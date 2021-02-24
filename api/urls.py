@@ -7,4 +7,8 @@ urlpatterns = [
     path('login/', loginview),
     path('addingredient/', ingredient),
     path('bakeryitems/', bakingitems),
+    path('bakeryitems/<str:item>/', bakingitems),
+    path('products/', getallproducts),
+    path('additem/', additemtocart),
+    path('placeorder', placeorder)
 ]

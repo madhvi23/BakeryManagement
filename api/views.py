@@ -1,5 +1,6 @@
 from api.enum import HttpConstants, ResponseConstants
-from api.services import userregisteration, addingredient, addbakeryitem
+from api.services import userregisteration, addingredient, addbakeryitem, \
+    getBakerItemDetail, getproducts, additems, createorder
 
 from django.contrib.auth import authenticate
 
@@ -15,6 +16,8 @@ from api.serializers import RegistrationSerializer, IngredientSerializer, Baking
 USER_CREATED_MESSAGE = "User Created Successfully!!"
 LOGIN_MESSAGE = "User Logged in Successfully"
 INGREDIENT_ADDED_MESSAGE = 'Ingredient Added Successfully!!'
+BAKERYITEM_ADDED_MESSAGE = 'Bakery Item Added Successfully!!'
+ITEM_ADDED_MESSAGE = 'Item added to cart!!'
 
 
 @api_view([HttpConstants.POST.value])
@@ -60,19 +63,49 @@ def ingredient(request):
             return Response({"status": HTTP_400_BAD_REQUEST, "message": str(err)})
 
 
-@api_view([HttpConstants.POST.value])
+@api_view([HttpConstants.POST.value, HttpConstants.GET.value])
 @permission_classes([IsAdminUser, IsAuthenticated])
-def bakingitems(request):
+def bakingitems(request, item=None):
     if request.method == HttpConstants.POST.value:
         try:
             serializer = BakingItemSerializer(data=request.POST)
             serializer.is_valid(raise_exception=True)
             response = addbakeryitem(serializer.data)
             if response == ResponseConstants.SUCCESS.value:
-                return Response({"status": HTTP_201_CREATED, "message": INGREDIENT_ADDED_MESSAGE})
+                return Response({"status": HTTP_201_CREATED, "message": BAKERYITEM_ADDED_MESSAGE})
         except Exception as err:
             return Response({"status": HTTP_400_BAD_REQUEST, "message": str(err)})
 
+    if request.method == HttpConstants.GET.value:
+        response, data = getBakerItemDetail(item)
+        if response == ResponseConstants.SUCCESS.value:
+            return Response({"data": data, "status": HTTP_200_OK})
+        return Response({"Error": data, "status": HTTP_400_BAD_REQUEST})
 
 
+@api_view([HttpConstants.GET.value])
+def getallproducts(request):
+    response, data = getproducts()
+    if response == ResponseConstants.SUCCESS.value:
+        return Response({"data": data, "status": HTTP_200_OK})
+    return Response({"Error": data, "status": HTTP_400_BAD_REQUEST})
 
+
+@api_view([HttpConstants.POST.value])
+def additemtocart(request):
+    try:
+        response = additems(request.data)
+        if response == ResponseConstants.SUCCESS.value:
+            return Response({"message": ITEM_ADDED_MESSAGE, "status": HTTP_201_CREATED})
+    except Exception as err:
+        return Response({"Error": str(err), "status": HTTP_400_BAD_REQUEST})
+
+
+@api_view([HttpConstants.GET.value, HttpConstants.POST.value])
+def placeorder(request):
+    try:
+        response = createorder(request.data)
+        if response == ResponseConstants.SUCCESS.value:
+            return Response({"message": ITEM_ADDED_MESSAGE, "status": HTTP_201_CREATED})
+    except Exception as err:
+        return Response({"Error": str(err), "status": HTTP_400_BAD_REQUEST})

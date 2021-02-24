@@ -11,3 +11,10 @@ class HttpConstants(Enum):
 class ResponseConstants(Enum):
     SUCCESS = 'success'
     FAIL = 'Fail'
+
+
+class OrderStatus(Enum):
+    PLACED = 'Placed'
+    DELIVERED = 'Delivered'
+    INPROCESS = "In Process"
+    DISPATCH = "Dispatched"

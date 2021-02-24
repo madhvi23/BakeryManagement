@@ -1,8 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-# Create your models here.
-
 
 class Ingredients(models.Model):
     ingredientId = models.AutoField(primary_key=True)
@@ -37,19 +35,10 @@ class CustomerRegsiteration(models.Model):
         return self.user.username
 
 
-class UserRole(models.Model):
-    user = models.ForeignKey(CustomerRegsiteration, on_delete=models.CASCADE)
-    role = models.CharField(choices=(('customer', 'Customer'), ('admin', 'Admin')),
-                            max_length=8)
-
-
 class Cart(models.Model):
     cartId = models.AutoField(primary_key=True)
-    itemId = models.OneToOneField(BakeryItem, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-
-    def __str__(self):
-        return f"Cart Value is {self.itemId.costprice * self.quantity}"
+    customerId = models.OneToOneField(CustomerRegsiteration, on_delete=models.CASCADE)
+    items = models.JSONField(default=[])
 
 
 class Order(models.Model):
@@ -57,8 +46,11 @@ class Order(models.Model):
     address = models.CharField(max_length=100)
     customerId = models.OneToOneField(CustomerRegsiteration, on_delete=models.CASCADE)
     cartId = models.OneToOneField(Cart, on_delete=models.CASCADE)
+    date = models.DateField(auto_now=True)
+    status = models.CharField(max_length=20)
+    total = models.IntegerField(default=0)
+    items = models.JSONField(default={})
 
     def __str__(self):
         return self.orderId
-
 
