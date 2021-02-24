@@ -115,7 +115,6 @@ def createorder(data):
     cart = Cart.objects.get(customerId=customer)
     items = cart.items
     total = 0
-    print(cart.items)
 
     if not items:
         raise Exception("Cart is Empty!!")
@@ -135,5 +134,4 @@ def createorder(data):
 def getorders(customerId):
     orders = Order.objects.filter(customerId=CustomerRegsiteration.objects.get(pk=customerId))
     serializer = OrderSerializer(orders, many=True)
-    print(serializer.data)
     return ResponseConstants.SUCCESS.value, serializer.data
