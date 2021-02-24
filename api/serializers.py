@@ -4,6 +4,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 from api.models import Ingredients
 
+
 class RegistrationSerializer(serializers.Serializer):
     username = serializers.CharField(max_length=100, required=True, trim_whitespace=True,
                                      validators=[UniqueValidator(queryset=User.objects.all())])
@@ -29,3 +30,11 @@ class BakingItemSerializer(serializers.Serializer):
     makingcharges = serializers.CharField(required=True, max_length=100)
     ingredientslist = serializers.JSONField(required=True)
 
+
+class OrderSerializer(serializers.Serializer):
+    address = serializers.CharField(max_length=100)
+    customerId = serializers.CharField(max_length=100)
+    date = serializers.DateField()
+    status = serializers.CharField(max_length=20)
+    total = serializers.IntegerField()
+    items = serializers.JSONField()

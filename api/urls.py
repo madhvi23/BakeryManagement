@@ -10,5 +10,6 @@ urlpatterns = [
     path('bakeryitems/<str:item>/', bakingitems),
     path('products/', getallproducts),
     path('additem/', additemtocart),
-    path('placeorder', placeorder)
+    path('placeorder/', order),
+    path('placeorder/<int:customerId>/', order)
 ]

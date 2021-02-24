@@ -1,6 +1,6 @@
 from api.enum import HttpConstants, ResponseConstants
 from api.services import userregisteration, addingredient, addbakeryitem, \
-    getBakerItemDetail, getproducts, additems, createorder
+    getBakerItemDetail, getproducts, additems, createorder, getorders
 
 from django.contrib.auth import authenticate
 
@@ -18,6 +18,7 @@ LOGIN_MESSAGE = "User Logged in Successfully"
 INGREDIENT_ADDED_MESSAGE = 'Ingredient Added Successfully!!'
 BAKERYITEM_ADDED_MESSAGE = 'Bakery Item Added Successfully!!'
 ITEM_ADDED_MESSAGE = 'Item added to cart!!'
+ORDER_PLACED_MESSAGE = 'Order Placed Successfully!!'
 
 
 @api_view([HttpConstants.POST.value])
@@ -102,10 +103,22 @@ def additemtocart(request):
 
 
 @api_view([HttpConstants.GET.value, HttpConstants.POST.value])
-def placeorder(request):
-    try:
-        response = createorder(request.data)
-        if response == ResponseConstants.SUCCESS.value:
-            return Response({"message": ITEM_ADDED_MESSAGE, "status": HTTP_201_CREATED})
-    except Exception as err:
-        return Response({"Error": str(err), "status": HTTP_400_BAD_REQUEST})
+def order(request, customerId=None):
+    if request.method == HttpConstants.POST.value:
+        try:
+            response, orderId = createorder(request.data)
+            if response == ResponseConstants.SUCCESS.value:
+                return Response({"message": ORDER_PLACED_MESSAGE, "status": HTTP_201_CREATED, "orderId": orderId})
+        except Exception as err:
+            return Response({"Error": str(err), "status": HTTP_400_BAD_REQUEST})
+
+    if request.method == HttpConstants.GET.value:
+        try:
+            response, orders = getorders(customerId)
+            if response == ResponseConstants.SUCCESS.value:
+                return Response({"orders": orders, "status": HTTP_200_OK})
+        except Exception as err:
+            return Response({"Error": str(err), "status": HTTP_400_BAD_REQUEST})
+
+
+

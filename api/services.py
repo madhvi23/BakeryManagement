@@ -2,7 +2,7 @@ import json
 
 from api.enum import ResponseConstants, OrderStatus
 from api.models import CustomerRegsiteration, Ingredients, BakeryItem, Cart, Order
-from api.serializers import BakingItemSerializer
+from api.serializers import BakingItemSerializer, OrderSerializer
 from django.contrib.auth.models import User
 
 
@@ -91,28 +91,49 @@ def getproducts():
 
 def additems(data):
     customerId = data["customerId"]
-    itemname = data["itemname"]
+    bakeryitemId = data["itemId"]
     price = data["price"]
     quantity = data["quantity"]
 
     customer = CustomerRegsiteration.objects.get(customerId=customerId)
     cartid = Cart.objects.filter(customerId=customer)
-    item = [{"itemId": BakeryItem.objects.get(itemname__iexact=itemname).bakeryitemId,
+    item = [{"itemname": BakeryItem.objects.get(pk=bakeryitemId).itemname,
              "quantity": quantity, "price": price}]
+
     if not cartid:
         Cart.objects.create(customerId=customer, items=item)
         return ResponseConstants.SUCCESS.value
-    cartid[0].items.append(item)
+    cartid[0].items.extend(item)
+    cartid[0].save(update_fields=['items'])
     return ResponseConstants.SUCCESS.value
 
 
 def createorder(data):
-    items = data["items"]
     customerId = data["customerId"]
     address = data["address"]
-    Order.objects.create(status=OrderStatus.PLACED.value,
-                         customerId=customerId, address=address,
-                         cartId=Cart.objects.get(customerId__customerId=customerId),
-                         items=items)
-    print("*"*100)
-    return ResponseConstants.SUCCESS.value
+    customer = CustomerRegsiteration.objects.get(pk=customerId)
+    cart = Cart.objects.get(customerId=customer)
+    items = cart.items
+    total = 0
+    print(cart.items)
+
+    if not items:
+        raise Exception("Cart is Empty!!")
+
+    for item in items:
+        total += item["price"]*item["quantity"]
+
+    order = Order.objects.create(status=OrderStatus.PLACED.value,
+                         customerId=customer, address=address,
+                         cartId=cart,
+                         items=items, total=total)
+    cart.items = []
+    cart.save(update_fields=['items'])
+    return ResponseConstants.SUCCESS.value, order.orderId
+
+
+def getorders(customerId):
+    orders = Order.objects.filter(customerId=CustomerRegsiteration.objects.get(pk=customerId))
+    serializer = OrderSerializer(orders, many=True)
+    print(serializer.data)
+    return ResponseConstants.SUCCESS.value, serializer.data
