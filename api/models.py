@@ -58,3 +58,5 @@ class Order(models.Model):
 class Order1(models.Model):
     pass
 
+class Order2(models.Model):
+    pass
