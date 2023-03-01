@@ -65,3 +65,5 @@ class TestForRebase3(models.Model):
 class Order1(models.Model):
     pass
 
+class Order2(models.Model):
+    pass
