@@ -61,6 +61,5 @@ class TestForRebase(models.Model):
 class TestForRebase2(models.Model):
     pass
 
-class TestForRebase3(models.Model):
-    pass
+
 
